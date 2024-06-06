@@ -1,7 +1,7 @@
 import time
 
 
-def timing_decorator(func):
+def time_it(func):
     """A decorator that prints the execution time of the function it decorates."""
 
     def wrapper(*args, **kwargs):
