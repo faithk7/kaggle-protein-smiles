@@ -1,7 +1,12 @@
+import argparse
 import time
 
+import yaml
 
-def time_it(func):
+from config import config
+
+
+def timeit(func):
     """A decorator that prints the execution time of the function it decorates."""
 
     def wrapper(*args, **kwargs):
@@ -12,3 +17,25 @@ def time_it(func):
         return result
 
     return wrapper
+
+
+def parse_yaml(relative_path: str) -> None:
+    yaml_path = config.CONFIG_DIR / relative_path
+
+    with open(yaml_path, "r") as file:
+        yaml_config = yaml.safe_load(file)
+
+    for key, value in yaml_config.items():
+        if hasattr(config, key):
+            setattr(config, key, value)
+        else:
+            raise ValueError(f"Invalid config key: {key} when loading from yaml")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Update config values at runtime.")
+    parser.add_argument(
+        "--config_path", "-c", type=str, help="Path to YAML config file"
+    )
+
+    return parser.parse_args()
