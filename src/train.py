@@ -21,6 +21,7 @@ def main():
         n_rows=10000 if config.DEBUG else None,
     )
 
+    #! Refactor
     dfs = []
     for i, protein_name in enumerate(config.PROTEIN_NAMES):
         sub_df = df[i::3]
@@ -32,6 +33,7 @@ def main():
     df = pl.concat(dfs, how="horizontal")
     df = df.sample(n=config.N_SAMPLES)
 
+    #! Refactor
     if config.NORMALIZE:
         df = df.with_columns(
             pl.col("molecule_smiles").map_elements(normalize, return_dtype=pl.Utf8)
@@ -40,6 +42,7 @@ def main():
             pl.col("molecule_smiles").map_elements(normalize, return_dtype=pl.Utf8)
         )
 
+    #! Refactor
     train_df, val_df = df[: int(len(df) * 0.8)], df[int(len(df) * 0.8) :]
 
     datamodule = LBDataModule(train_df, val_df, test_df, tokenizer)
@@ -63,7 +66,7 @@ def main():
         progress_bar_callback,
     ]
 
-    trainer = L.Trainer(callbacks=callbacks, **config.trainer_params)
+    trainer = L.Trainer(callbacks=callbacks, **config.TRAINER_PARAMS)
     trainer.fit(modelmodule, datamodule)
 
 

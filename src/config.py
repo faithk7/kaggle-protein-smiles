@@ -25,7 +25,7 @@ class config:
     TRAIN_BATCH_SIZE = 256
 
     #! todo: refactor
-    trainer_params = {
+    TRAINER_PARAMS = {
         "max_epochs": 5,
         "enable_progress_bar": True,
         "accelerator": "auto",
