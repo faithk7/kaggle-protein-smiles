@@ -54,13 +54,16 @@ def main():
     datamodule = LBDataModule(train_df, val_df, test_df, tokenizer)
     modelmodule = LBModelModule(config.MODEL_NAME)
 
+    save_path = config.MODEL_ROOT / append_curtimestr(
+        extract_modelname(config.MODEL_NAME)
+    )
+
     checkpoint_callback = ModelCheckpoint(
         filename="model-{val_map:.4f}",
         save_weights_only=True,
         monitor="val_map",
         mode="max",
-        dirpath=config.MODEL_ROOT
-        / append_curtimestr(extract_modelname(config.MODEL_NAME)),
+        dirpath=save_path,
         save_top_k=1,
         verbose=1,
     )
