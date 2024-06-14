@@ -12,13 +12,14 @@ class config:
     MODEL_ROOT = Path("../models/")
     TRAIN_PATH = DATA_ROOT / "train.csv"
     TEST_PATH = DATA_ROOT / "test.csv"
+    CONFIG_DIR = Path("../config/")
 
-    DEBUG = True
+    DEBUG = False
     ENABLE_NEPTUNE = False
 
     # -- data --
     N_ROWS = 180_000_000
-    N_SAMPLES = 10_000 if DEBUG else 2_000_000
+    N_SAMPLES = 2_000_000
     PROTEIN_NAMES = ["BRD4", "HSA", "sEH"]
 
     # -- train --

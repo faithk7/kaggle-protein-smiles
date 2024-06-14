@@ -57,15 +57,6 @@ class LBDataModule(L.LightningDataModule):
         self.test_df = test_df
         self.tokenizer = tokenizer
 
-    # def prepare_data_per_node(self, *args, **kwargs):
-    #     return super().prepare_data_per_node(*args, **kwargs)
-
-    # def prepare_data(self) -> None:
-    #     return super().prepare_data()
-
-    # def setup(self, stage=None):
-    #     return super().setup(stage)
-
     def _generate_dataset(self, stage):
         if stage == "train":
             df = self.train_df
