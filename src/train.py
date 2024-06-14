@@ -7,7 +7,7 @@ from config import config
 from dataset import LBDataModule, tokenizer
 from model import LBModelModule
 from preprocess import normalize
-from utils import parse_args, parse_yaml
+from utils import append_curtimestr, extract_modelname, parse_args, parse_yaml
 
 
 def main():
@@ -59,7 +59,8 @@ def main():
         save_weights_only=True,
         monitor="val_map",
         mode="max",
-        dirpath="/kaggle/working",
+        dirpath=config.MODEL_ROOT
+        / append_curtimestr(extract_modelname(config.MODEL_NAME)),
         save_top_k=1,
         verbose=1,
     )
@@ -84,6 +85,11 @@ def eval_config() -> None:
 
     if config.DEBUG:
         config.N_SAMPLES = 10_000
+        config.TRAINER_PARAMS["max_epochs"] = 1
+
+
+def do_inference():
+    pass
 
 
 if __name__ == "__main__":

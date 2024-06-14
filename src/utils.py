@@ -1,5 +1,6 @@
 import argparse
 import time
+from datetime import datetime
 
 import yaml
 
@@ -39,3 +40,12 @@ def parse_args():
     )
 
     return parser.parse_args()
+
+
+def extract_modelname(modelname: str):
+    return modelname.split("/")[-1]
+
+
+def append_curtimestr(filename: str) -> str:
+    cur_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    return f"{filename}_{cur_time}"
