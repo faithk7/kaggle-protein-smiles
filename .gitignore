@@ -16,7 +16,7 @@ src/lightning_logs/**
 data/**/*
 tmp/*
 !data/.gitkeep
-
+src/lightning_logs/*
 
 **/*.csv
 **/*.json
