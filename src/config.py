@@ -4,6 +4,12 @@ from tkinter import NORMAL
 
 
 class config:
+    # == general ==
+    DEBUG = False
+    ENABLE_NEPTUNE = False
+    DO_INFERENCE = True
+
+    # == paths ==
     DATA_ROOT = (
         Path("../data/")
         if not os.path.exists("/kaggle")
@@ -14,15 +20,12 @@ class config:
     TEST_PATH = DATA_ROOT / "test.csv"
     CONFIG_DIR = Path("../config/")
 
-    DEBUG = False
-    ENABLE_NEPTUNE = False
-
-    # -- data --
+    # == data ==
     N_ROWS = 180_000_000
     N_SAMPLES = 2_000_000
     PROTEIN_NAMES = ["BRD4", "HSA", "sEH"]
 
-    # -- train --
+    # == train ==
     TRAIN_BATCH_SIZE = 256
 
     #! todo: refactor

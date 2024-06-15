@@ -8,10 +8,10 @@ from metrics import MAPMetric
 
 
 class LMModel(nn.Module):
-    def __init__(self, MODEL_NAME):
+    def __init__(self, model_name: str):
         super().__init__()
-        self.config = AutoConfig.from_pretrained(MODEL_NAME, num_labels=3)
-        self.lm = AutoModel.from_pretrained(MODEL_NAME, add_pooling_layer=False)
+        self.config = AutoConfig.from_pretrained(model_name, num_labels=3)
+        self.lm = AutoModel.from_pretrained(model_name, add_pooling_layer=False)
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         self.classifier = nn.Linear(self.config.hidden_size, self.config.num_labels)
         self.loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
@@ -34,9 +34,9 @@ class LMModel(nn.Module):
 
 
 class LBModelModule(L.LightningModule):
-    def __init__(self, MODEL_NAME):
+    def __init__(self, model_name):
         super().__init__()
-        self.model = LMModel(MODEL_NAME)
+        self.model = LMModel(model_name)
         self.map_ = MAPMetric(task="binary")
 
     def forward(self, batch):

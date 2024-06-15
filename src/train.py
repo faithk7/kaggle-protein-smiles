@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import lightning as L
 import polars as pl
+import torch
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, TQDMProgressBar
 from transformers import AutoTokenizer
 
@@ -78,6 +81,9 @@ def main():
     trainer = L.Trainer(callbacks=callbacks, **config.TRAINER_PARAMS)
     trainer.fit(modelmodule, datamodule)
 
+    if config.DO_INFERENCE:
+        do_inference(save_path, datamodule, trainer)
+
 
 def eval_config() -> None:
     args = parse_args()
@@ -87,12 +93,62 @@ def eval_config() -> None:
         parse_yaml(args.config_path)
 
     if config.DEBUG:
-        config.N_SAMPLES = 10_000
+        config.N_SAMPLES = 1000
         config.TRAINER_PARAMS["max_epochs"] = 1
 
 
-def do_inference():
-    pass
+def do_inference(model_dir: Path, datamodule: LBDataModule, trainer):
+    # get the test data
+    test_df = pl.read_parquet(
+        config.DATA_ROOT / "test.parquet",
+        columns=["molecule_smiles"],
+        n_rows=10000 if config.DEBUG else None,
+    )
+    model_paths = model_dir.glob("*.ckpt")
+    test_dataloader = datamodule.test_dataloader()
+
+    for model_path in model_paths:
+        _do_inference_one_model(model_path, test_df, test_dataloader, trainer)
+
+    _ensemble_submissions(model_dir)
+
+
+#! refactor
+def _do_inference_one_model(model_path: Path, test_df, test_dataloader, trainer):
+    model = LBModelModule.load_from_checkpoint(model_path, model_name=config.MODEL_NAME)
+    predictions = trainer.predict(model, test_dataloader)
+    predictions = torch.cat(predictions).numpy()
+    model_dir = model_path.parent
+
+    pred_dfs = []
+    for i, protein_name in enumerate(config.PROTEIN_NAMES):
+        pred_dfs.append(
+            test_df.with_columns(
+                pl.lit(protein_name).alias("protein_name"),
+                pl.lit(predictions[:, i]).alias("binds"),
+            )
+        )
+    pred_df = pl.concat(pred_dfs)
+
+    submit_df = (
+        pl.read_parquet(
+            Path(config.DATA_ROOT, "test.parquet"),
+            columns=["id", "molecule_smiles", "protein_name"],
+        )
+        .join(pred_df, on=["molecule_smiles", "protein_name"], how="left")
+        .select(["id", "binds"])
+        .sort("id")
+    )
+    submit_df.write_csv(Path(model_dir, f"submission_{model_path.stem}.csv"))
+
+
+def _ensemble_submissions(model_dir: Path):
+    submission_paths = model_dir.glob("submission_*.csv")
+    sub_dfs = []
+    for submission_path in submission_paths:
+        sub_dfs.append(pl.read_csv(submission_path))
+    submit_df = pl.concat(sub_dfs).group_by("id").agg(pl.col("binds").mean()).sort("id")
+    submit_df.write_csv(Path(model_dir, "submission.csv"))
 
 
 if __name__ == "__main__":
