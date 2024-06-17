@@ -1,0 +1,3 @@
+DEBUG: false
+N_SAMPLES: 3_000_000
+MODEL_NAME: "DeepChem/ChemBERTa-77M-MTR"

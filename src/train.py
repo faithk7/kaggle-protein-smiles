@@ -10,9 +10,10 @@ from config import config
 from dataset import LBDataModule, tokenizer
 from model import LBModelModule
 from preprocess import normalize
-from utils import append_curtimestr, extract_modelname, parse_args, parse_yaml
+from utils import append_curtimestr, extract_modelname, parse_args, parse_yaml, timeit
 
 
+@timeit
 def main():
     df = pl.read_parquet(
         config.DATA_ROOT / "train.parquet",
